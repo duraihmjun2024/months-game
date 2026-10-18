@@ -134,23 +134,43 @@
           <button class="btn-speak" onclick="startEvaluation('${item.word}', this)">🎙️ Speak</button>
         </div>
         <div class="user-spoken-text" id="spoken-${index}">You said: (none)</div>
-        <!-- Embedded HTML5 Audio Element to force Smartboard hardware decoding -->
-        <audio id="audio-${index}" src="https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(item.word)}&tl=en&client=tw-ob"></audio>
+        <audio id="audio-${index}" preload="none"></audio>
       `;
       gridEl.appendChild(card);
     });
 
-    // Uses the embedded DOM audio element directly triggered by user click gesture
-    function playNativeAudio(text, index) {
+    // Play audio after a direct user tap. Use the tested Indian English locale.
+    async function playNativeAudio(text, index) {
       const audioElement = document.getElementById(`audio-${index}`);
-      if (audioElement) {
-        audioElement.currentTime = 0;
-        audioElement.play().catch(err => {
-          console.log("DOM audio play fallback error:", err);
-          // Fallback mechanism if direct element fails
-          const fallbackAudio = new Audio(`https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=en&client=tw-ob`);
-          fallbackAudio.play();
+      const audioUrl = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en-in&q=${encodeURIComponent(text)}`;
+
+      try {
+        if (!audioElement) throw new Error("Audio player was not found.");
+
+        document.querySelectorAll("audio").forEach(a => {
+          if (a !== audioElement) {
+            a.pause();
+            a.currentTime = 0;
+          }
         });
+
+        audioElement.pause();
+        audioElement.currentTime = 0;
+        audioElement.src = audioUrl;
+        audioElement.load();
+        await audioElement.play();
+
+        feedbackEl.style.color = "#4f46e5";
+        feedbackEl.textContent = `🔊 Playing "${text}"...`;
+        audioElement.onended = () => { feedbackEl.textContent = ""; };
+        audioElement.onerror = () => {
+          feedbackEl.style.color = "#dc2626";
+          feedbackEl.textContent = `Audio could not be loaded for "${text}". Check the internet connection and try again.`;
+        };
+      } catch (err) {
+        console.error("Audio playback failed:", err);
+        feedbackEl.style.color = "#dc2626";
+        feedbackEl.textContent = `Audio playback failed: ${err && err.message ? err.message : err}. Please tap Listen again.`;
       }
     }
 
