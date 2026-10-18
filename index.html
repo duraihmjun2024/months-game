@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image vs Voice Matching - Months</title>
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --success: #16a34a;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+    }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background-color: var(--bg);
+      color: #1e293b;
+      margin: 0;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+    h1 { font-size: 1.5rem; margin: 0 0 0.5rem 0; }
+    p { color: #64748b; font-size: 0.95rem; margin: 0; }
+
+    .grid-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 1rem;
+      width: 100%;
+      max-width: 1000px;
+    }
+    .card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 0.75rem;
+      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      transition: transform 0.2s;
+    }
+    .card:hover { transform: translateY(-3px); }
+    .card img {
+      width: 100%;
+      height: 130px;
+      object-fit: cover;
+      border-radius: 8px;
+      background: #e2e8f0;
+    }
+    .card span {
+      font-weight: 600;
+      margin: 0.5rem 0;
+      font-size: 0.9rem;
+    }
+    .btn-row {
+      display: flex;
+      gap: 0.4rem;
+      width: 100%;
+    }
+    button {
+      flex: 1;
+      padding: 0.4rem;
+      border: none;
+      border-radius: 6px;
+      font-weight: 500;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+    .btn-listen { background: #e0e7ff; color: var(--primary); }
+    .btn-speak { background: var(--primary); color: white; }
+    
+    .user-spoken-text {
+      font-size: 0.75rem;
+      color: #475569;
+      margin-top: 0.4rem;
+      min-height: 1rem;
+      font-style: italic;
+    }
+
+    #feedback {
+      margin-top: 1.5rem;
+      font-weight: bold;
+      font-size: 1.1rem;
+      min-height: 1.5rem;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>📅 Months: Image vs. Voice Learning</h1>
+    <p>Tap "Listen" to hear audio, or "Speak" to test your voice evaluation!</p>
+  </header>
+
+  <div class="grid-container" id="appGrid"></div>
+  <div id="feedback"></div>
+
+  <script>
+    const monthsData = [
+      { word: "Months of the Year", url: "https://lh3.googleusercontent.com/d/1UOHjdl49bQgPwiebvMhstgvtW03rFau4" },
+      { word: "January", url: "https://lh3.googleusercontent.com/d/1CYREKVkeAXXfWN2BSA9jCmbxMqBLnTya" },
+      { word: "February", url: "https://lh3.googleusercontent.com/d/1R9dJLOKAEMhHt_ikfQWOphmgnVVMynO0" },
+      { word: "March", url: "https://lh3.googleusercontent.com/d/1rXWE3it2GvMA-wNXf01RtnZ_HiQoPT-t" },
+      { word: "April", url: "https://lh3.googleusercontent.com/d/1fA6cACO67jckdJThTFr5iN2v1Say-v2B" },
+      { word: "May", url: "https://lh3.googleusercontent.com/d/10x9800p3xqJhnWGko1jWECNGENta9Dl3" },
+      { word: "June", url: "https://lh3.googleusercontent.com/d/1OpSO3vzWEpbn9_ELO-EM7A-qNc04_9Hu" },
+      { word: "July", url: "https://lh3.googleusercontent.com/d/1npIhqbO6f-HosjsZtS5mpqmUmXrll0RD" },
+      { word: "August", url: "https://lh3.googleusercontent.com/d/1APexhFztWEnN38XETU_5ngsFZicv00lB" },
+      { word: "September", url: "https://lh3.googleusercontent.com/d/1gNzsZ5T6ZsKJCN54Z8JvwYpsSD9Ay6LH" },
+      { word: "October", url: "https://lh3.googleusercontent.com/d/1osi0wzXTYU1oKF8_5gexr0dzi-vm6zOF" },
+      { word: "November", url: "https://lh3.googleusercontent.com/d/1qVMPm3V91cC0l5GG7yG0KmTSk-tG3Yom" },
+      { word: "December", url: "https://lh3.googleusercontent.com/d/1kJouAgXVvycrHt9zLzLL9N-Efi-yj7ZG" }
+    ];
+
+    const gridEl = document.getElementById('appGrid');
+    const feedbackEl = document.getElementById('feedback');
+
+    monthsData.forEach((item, index) => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <img src="${item.url}" alt="${item.word}" loading="lazy">
+        <span>${index === 0 ? 'Intro' : item.word}</span>
+        <div class="btn-row">
+          <button class="btn-listen" onclick="playNativeAudio('${item.word}', ${index})">🔊 Listen</button>
+          <button class="btn-speak" onclick="startEvaluation('${item.word}', this)">🎙️ Speak</button>
+        </div>
+        <div class="user-spoken-text" id="spoken-${index}">You said: (none)</div>
+        <!-- Embedded HTML5 Audio Element to force Smartboard hardware decoding -->
+        <audio id="audio-${index}" src="https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(item.word)}&tl=en&client=tw-ob"></audio>
+      `;
+      gridEl.appendChild(card);
+    });
+
+    // Uses the embedded DOM audio element directly triggered by user click gesture
+    function playNativeAudio(text, index) {
+      const audioElement = document.getElementById(`audio-${index}`);
+      if (audioElement) {
+        audioElement.currentTime = 0;
+        audioElement.play().catch(err => {
+          console.log("DOM audio play fallback error:", err);
+          // Fallback mechanism if direct element fails
+          const fallbackAudio = new Audio(`https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=en&client=tw-ob`);
+          fallbackAudio.play();
+        });
+      }
+    }
+
+    function startEvaluation(expectedWord, btnElement) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        alert("Speech Recognition not supported in this browser.");
+        return;
+      }
+
+      const cardEl = btnElement.closest('.card');
+      const spokenLabel = cardEl.querySelector('.user-spoken-text');
+
+      const recognition = new SpeechRecognition();
+      recognition.lang = 'en-IN';
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+
+      feedbackEl.style.color = "#4f46e5";
+      feedbackEl.textContent = `Listening for "${expectedWord}"...`;
+      spokenLabel.textContent = `You said: Listening...`;
+
+      recognition.onresult = (event) => {
+        const spokenText = event.results[0][0].transcript.trim();
+        spokenLabel.textContent = `You said: "${spokenText}"`;
+        
+        const isMatch = spokenText.toLowerCase() === expectedWord.toLowerCase();
+
+        if (isMatch) {
+          feedbackEl.style.color = "var(--success)";
+          feedbackEl.textContent = `✅ Correct match for "${expectedWord}"!`;
+          playNativeAudio("Correct!", 0);
+        } else {
+          feedbackEl.style.color = "#dc2626";
+          feedbackEl.textContent = `❌ Try again! Expected "${expectedWord}".`;
+        }
+      };
+
+      recognition.onerror = (event) => {
+        feedbackEl.style.color = "#dc2626";
+        feedbackEl.textContent = `Speech error: ${event.error}`;
+        spokenLabel.textContent = `You said: [Error: ${event.error}]`;
+      };
+
+      recognition.start();
+    }
+  </script>
+</body>
+</html>
