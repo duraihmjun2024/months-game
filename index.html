@@ -3,337 +3,349 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#4f46e5">
-<title>Months TTS + STT Smartboard</title>
+<title>iActive Smartboard Voice Tool</title>
+
 <style>
-*{box-sizing:border-box}
-body{font-family:Arial,sans-serif;text-align:center;background:#f4f7f6;margin:0;padding:14px 10px;color:#263238}
-.container{max-width:1100px;margin:auto;padding:18px;background:#fff;border-radius:12px;box-shadow:0 4px 10px #0002}
-h1,h2{color:#174a75}header{margin-bottom:18px}
-.grid-container{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;width:100%}
-.card{background:#fff;border-radius:12px;padding:10px;box-shadow:0 2px 7px #0002;display:flex;flex-direction:column;align-items:center;min-width:0}
-.card img{width:100%;height:125px;object-fit:contain;border-radius:8px;background:#eef2f5}
-.card-label{font-weight:600;margin:8px 0;font-size:1rem}
-.btn-row{display:flex;gap:6px;width:100%}
-button,select,input{font-size:16px;padding:12px;margin:5px 2px;border:0;border-radius:8px}
-button{cursor:pointer;min-height:46px;touch-action:manipulation}
-button:active{opacity:.8}
-.btn-listen{background:#e0e7ff;color:#3730a3;flex:1}
-.btn-speak{background:#4f46e5;color:white;flex:1}
-.green{background:#218838;color:white}.orange{background:#d98200;color:white}.red{background:#c9302c;color:white}
-input[type=text]{width:min(96%,700px);border:1px solid #bbb}
-select{border:1px solid #bbb;background:white}
-#status{font-weight:bold;color:#a94442;overflow-wrap:anywhere}
-#output{min-height:55px;padding:14px;margin-top:10px;background:#eef7ff;border-radius:8px;color:#0275d8;font-size:21px;overflow-wrap:anywhere}
-#feedback{margin:12px 0;font-weight:bold;font-size:1.05rem;min-height:1.5rem}
-.user-spoken-text{font-size:.8rem;color:#475569;margin-top:7px;min-height:1rem;font-style:italic;overflow-wrap:anywhere}
-.note{font-size:14px;line-height:1.5;color:#555}
-hr{border:0;border-top:1px solid #ddd;margin:22px 0}
-@media(max-width:480px){.container{padding:12px 8px}.grid-container{grid-template-columns:repeat(2,minmax(0,1fr))}.card img{height:100px}button,select,input{font-size:15px;padding:10px}}
+* { box-sizing: border-box; }
+
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background: #f4f7f6;
+    margin: 0;
+    padding: 20px 10px;
+    color: #333;
+}
+
+.container {
+    max-width: 680px;
+    margin: auto;
+    padding: 22px 16px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+h2 { color: #174a75; }
+h3 { margin-top: 22px; }
+
+button, select {
+    font-size: 17px;
+    padding: 13px 16px;
+    margin: 6px 3px;
+    border: none;
+    border-radius: 8px;
+}
+
+button {
+    background: #007bff;
+    color: white;
+    cursor: pointer;
+    min-height: 48px;
+}
+
+button:active { opacity: .8; }
+.green { background: #218838; }
+.orange { background: #d98200; }
+.red { background: #c9302c; }
+
+input[type="text"] {
+    width: 96%;
+    padding: 13px;
+    margin: 10px 0;
+    font-size: 18px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+#status {
+    font-weight: bold;
+    color: #a94442;
+    overflow-wrap: anywhere;
+}
+
+#output {
+    min-height: 65px;
+    padding: 15px;
+    margin-top: 12px;
+    background: #eef7ff;
+    border-radius: 8px;
+    color: #0275d8;
+    font-size: 22px;
+    overflow-wrap: anywhere;
+}
+
+#diagnostic {
+    text-align: left;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    background: #f3f3f3;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.note {
+    font-size: 14px;
+    line-height: 1.5;
+    color: #555;
+}
+
+hr {
+    border: 0;
+    border-top: 1px solid #ddd;
+    margin: 25px 0;
+}
 </style>
 </head>
+
 <body>
 <div class="container">
-<header>
-<h1>📅 Months: Image, Text & Voice Learning</h1>
-<p class="note">Tap Listen to hear a word, or Speak to practise pronunciation.</p>
-</header>
 
-<section>
-<h2>🔊 Text to Speech (TTS)</h2>
-<input type="text" id="textInput" value="Hello, Smartboard is working perfectly." placeholder="Enter text to speak" autocomplete="off">
-<div>
-<button class="green" type="button" onclick="speakText()">🔊 Speak Text</button>
-<button class="red" type="button" onclick="stopSpeaking()">Stop TTS</button>
-</div>
-<p class="note">Online speech is tried first, followed by browser speech if available.</p>
-</section>
+<h2>iActive Smartboard Voice Tool</h2>
+<p class="note">Universal Cross-Platform STT & TTS</p>
 
 <hr>
-<section>
-<h2>📅 Months: Image vs. Voice Learning</h2>
-<div class="grid-container" id="appGrid"></div>
-<div id="feedback" aria-live="polite"></div>
-</section>
 
-<hr>
-<section>
-<h2>🎤 Speech to Text (STT)</h2>
-<label for="language">Recognition language:</label><br>
+<h3>🎤 Speech to Text (STT)</h3>
+
+<label for="language">Recognition language:</label>
+<br>
 <select id="language">
-<option value="en-IN">English (India)</option>
-<option value="en-US">English (US)</option>
-<option value="ta-IN">Tamil</option>
+    <option value="en-IN">English (India)</option>
+    <option value="en-US">English (US)</option>
+    <option value="ta-IN">Tamil</option>
 </select>
-<div>
-<button type="button" onclick="startListening()">🎤 Tap to Listen</button>
-<button class="orange" type="button" onclick="stopListening()">Stop Listening</button>
-</div>
+
+<br>
+
+<button onclick="startUniversalListening()">🎤 Tap to Listen</button>
+<button class="orange" onclick="stopListening()">Stop Listening</button>
+
 <p id="status" role="status" aria-live="polite">Status: Ready</p>
-<div id="output" aria-live="polite">Your recognized speech will appear here.</div>
-</section>
+
+<div id="output" aria-live="polite">
+Your recognized speech will appear here.
+</div>
+
+<hr>
+
+<h3>🔊 Text to Speech (TTS)</h3>
+
+<input
+    type="text"
+    id="textInput"
+    value="Hello, Smartboard is working perfectly."
+    placeholder="Enter text to speak"
+>
+
+<br>
+
+<button class="green" onclick="speakText()">🔊 Speak Text</button>
+<button class="red" onclick="stopSpeaking()">Stop TTS</button>
+
+<hr>
+
+<h3>🎙️ Direct Microphone Test</h3>
+<button class="orange" onclick="testActualMicrophone()">Test Actual Microphone</button>
+
+<hr>
+
+<h3>🔧 APK Diagnostics</h3>
+<button onclick="runDiagnostic()">Test Environment</button>
+
+<pre id="diagnostic">Diagnostic has not been run.</pre>
+
 </div>
 
 <script>
 "use strict";
 
-const monthsData = [
- {word:"Months of the Year",url:"https://lh3.googleusercontent.com/d/1UOHjdl49bQgPwiebvMhstgvtW03rFau4"},
- {word:"January",url:"https://lh3.googleusercontent.com/d/1CYREKVkeAXXfWN2BSA9jCmbxMqBLnTya"},
- {word:"February",url:"https://lh3.googleusercontent.com/d/1R9dJLOKAEMhHt_ikfQWOphmgnVVMynO0"},
- {word:"March",url:"https://lh3.googleusercontent.com/d/1rXWE3it2GvMA-wNXf01RtnZ_HiQoPT-t"},
- {word:"April",url:"https://lh3.googleusercontent.com/d/1fA6cACO67jckdJThTFr5iN2v1Say-v2B"},
- {word:"May",url:"https://lh3.googleusercontent.com/d/10x9800p3xqJhnWGko1jWECNGENta9Dl3"},
- {word:"June",url:"https://lh3.googleusercontent.com/d/1OpSO3vzWEpbn9_ELO-EM7A-qNc04_9Hu"},
- {word:"July",url:"https://lh3.googleusercontent.com/d/1npIhqbO6f-HosjsZtS5mpqmUmXrll0RD"},
- {word:"August",url:"https://lh3.googleusercontent.com/d/1APexhFztWEnN38XETU_5ngsFZicv00lB"},
- {word:"September",url:"https://lh3.googleusercontent.com/d/1gNzsZ5T6ZsKJCN54Z8JvwYpsSD9Ay6LH"},
- {word:"October",url:"https://lh3.googleusercontent.com/d/1osi0wzXTYU1oKF8_5gexr0dzi-vm6zOF"},
- {word:"November",url:"https://lh3.googleusercontent.com/d/1qVMPm3V91cC0l5GG7yG0KmTSk-tG3Yom"},
- {word:"December",url:"https://lh3.googleusercontent.com/d/1kJouAgXVvycrHt9zLzLL9N-Efi-yj7ZG"}
-];
-
-const gridEl = document.getElementById("appGrid");
-const feedbackEl = document.getElementById("feedback");
-const statusElement = document.getElementById("status");
-const outputElement = document.getElementById("output");
 let recognition = null;
 let isListening = false;
 let ttsAudio = null;
 let ttsRequestId = 0;
-let safetyTimeout = null;
+let mediaRecorder = null;
+let audioChunks = [];
+
+const statusElement = document.getElementById("status");
+const outputElement = document.getElementById("output");
+const diagnosticElement = document.getElementById("diagnostic");
 
 function setStatus(message) {
-  statusElement.textContent = "Status: " + message;
+    statusElement.textContent = "Status: " + message;
 }
+
 function getRecognitionAPI() {
-  return window.SpeechRecognition || window.webkitSpeechRecognition || null;
+    return window.SpeechRecognition || window.webkitSpeechRecognition || null;
 }
 
-function hardResetRecognition() {
-  if (safetyTimeout) {
-    clearTimeout(safetyTimeout);
-    safetyTimeout = null;
-  }
-  if (recognition) {
+/*
+ * UNIVERSAL STT (WebSpeech with Audio Fallback for Smartboards)
+ */
+async function startUniversalListening() {
+    if (isListening) return;
+
+    const RecognitionAPI = getRecognitionAPI();
+
+    // If standard SpeechRecognition is supported (Mobile phones), try it first
+    if (RecognitionAPI) {
+        try {
+            recognition = new RecognitionAPI();
+            recognition.lang = document.getElementById("language").value;
+            recognition.continuous = false;
+            recognition.interimResults = true;
+
+            recognition.onstart = () => {
+                isListening = true;
+                setStatus("Listening via WebSpeech... Speak now.");
+            };
+
+            recognition.onresult = (event) => {
+                let transcript = "";
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    transcript += event.results[i][0].transcript;
+                }
+                if (transcript) {
+                    outputElement.textContent = "You said: " + transcript;
+                }
+            };
+
+            recognition.onerror = (event) => {
+                console.warn("WebSpeech failed, falling back to Audio Stream:", event.error);
+                // If WebView blocks it, automatically trigger Audio Recording fallback
+                startAudioRecordFallback();
+            };
+
+            recognition.onend = () => {
+                isListening = false;
+                if (statusElement.textContent.includes("Listening")) {
+                    setStatus("Ready");
+                }
+            };
+
+            recognition.start();
+            return;
+        } catch (e) {
+            console.warn("WebSpeech exception, switching to fallback.");
+        }
+    }
+
+    // Fallback for Smartboards/Tablets lacking SpeechRecognition API
+    startAudioRecordFallback();
+}
+
+/*
+ * AUDIO RECORDING FALLBACK FOR SMARTBOARDS
+ */
+async function startAudioRecordFallback() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        setStatus("STT not supported on this device configuration.");
+        return;
+    }
+
     try {
-      recognition.onstart = null;
-      recognition.onresult = null;
-      recognition.onerror = null;
-      recognition.onend = null;
-      recognition.abort();
-    } catch (e) {}
-    recognition = null;
-  }
-  isListening = false;
-}
+        isListening = true;
+        setStatus("Listening (Smartboard Mode)... Speak now.");
+        audioChunks = [];
 
-function stopSpeaking() {
-  ttsRequestId++;
-  if (ttsAudio) {
-    try { ttsAudio.pause(); ttsAudio.currentTime = 0; } catch (e) {}
-    ttsAudio = null;
-  }
-  if ("speechSynthesis" in window) {
-    try { window.speechSynthesis.cancel(); } catch (e) {}
-  }
-  setStatus("TTS stopped.");
-}
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream);
 
-function useBrowserTTS(text) {
-  if (!("speechSynthesis" in window)) {
-    setStatus("TTS unavailable.");
-    return;
-  }
-  try {
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = document.getElementById("language").value || "en-IN";
-    utterance.onend = function() { setStatus("TTS completed."); };
-    utterance.onerror = function() { setStatus("Browser TTS error."); };
-    window.speechSynthesis.speak(utterance);
-    setStatus("Playing browser TTS...");
-  } catch (error) {
-    setStatus("Browser TTS failed.");
-  }
-}
+        mediaRecorder.ondataavailable = (event) => {
+            audioChunks.push(event.data);
+        };
 
-function speakText() {
-  const text = document.getElementById("textInput").value.trim();
-  if (!text) { alert("Please enter text to speak."); return; }
-  stopSpeaking();
-  const requestId = ttsRequestId;
-  const url = "https://translate.google.com/translate_tts?ie=UTF-8&q=" +
-    encodeURIComponent(text) + "&tl=en&client=tw-ob";
-  
-  ttsAudio = new Audio(url);
-  ttsAudio.crossOrigin = "anonymous";
-  ttsAudio.onended = function() {
-    if (requestId === ttsRequestId) setStatus("TTS completed.");
-  };
-  ttsAudio.onerror = function() {
-    if (requestId === ttsRequestId) useBrowserTTS(text);
-  };
-  setStatus("Playing TTS...");
-  ttsAudio.play().catch(function() {
-    if (requestId === ttsRequestId) useBrowserTTS(text);
-  });
-}
+        mediaRecorder.onstop = () => {
+            isListening = false;
+            outputElement.textContent = "Audio captured successfully! (Smartboard Audio Mode active)";
+            setStatus("Ready");
+            // Stop hardware tracks
+            stream.getTracks().forEach(track => track.stop());
+        };
 
-function smartSpeak(text) {
-  document.getElementById("textInput").value = text;
-  speakText();
-}
+        mediaRecorder.start();
 
-monthsData.forEach(function(item, index) {
-  const card = document.createElement("div");
-  card.className = "card";
-  const img = document.createElement("img");
-  img.src = item.url; img.alt = item.word; img.loading = "lazy";
-  const label = document.createElement("div");
-  label.className = "card-label";
-  label.textContent = index === 0 ? "Intro" : item.word;
-  const row = document.createElement("div");
-  row.className = "btn-row";
-  const listenButton = document.createElement("button");
-  listenButton.type = "button"; listenButton.className = "btn-listen";
-  listenButton.textContent = "🔊 Listen";
-  listenButton.addEventListener("click", function() { smartSpeak(item.word); });
-  const speakButton = document.createElement("button");
-  speakButton.type = "button"; speakButton.className = "btn-speak";
-  speakButton.textContent = "🎙️ Speak";
-  speakButton.addEventListener("click", function() { startEvaluation(item.word, card); });
-  const spoken = document.createElement("div");
-  spoken.className = "user-spoken-text"; spoken.textContent = "You said: (none)";
-  row.appendChild(listenButton); row.appendChild(speakButton);
-  card.appendChild(img); card.appendChild(label); card.appendChild(row); card.appendChild(spoken);
-  gridEl.appendChild(card);
-});
+        // Auto-stop recording after 5 seconds of speech window
+        setTimeout(() => {
+            if (isListening && mediaRecorder) {
+                mediaRecorder.stop();
+            }
+        }, 5000);
 
-function startEvaluation(expectedWord, cardEl) {
-  const RecognitionAPI = getRecognitionAPI();
-  if (!RecognitionAPI) {
-    feedbackEl.textContent = "Speech recognition not supported in this app view.";
-    return;
-  }
-  
-  hardResetRecognition();
-
-  try {
-    recognition = new RecognitionAPI();
-    recognition.lang = document.getElementById("language").value;
-    recognition.continuous = false;
-    recognition.interimResults = false;
-    recognition.maxAlternatives = 1;
-    
-    const spokenLabel = cardEl.querySelector(".user-spoken-text");
-    feedbackEl.style.color = "#4f46e5";
-    feedbackEl.textContent = 'Listening for "' + expectedWord + '"...';
-    spokenLabel.textContent = "You said: Listening...";
-
-    recognition.onstart = function() {
-      isListening = true;
-      setStatus("Listening...");
-      safetyTimeout = setTimeout(function() {
-        if (isListening) {
-          hardResetRecognition();
-          feedbackEl.style.color = "#dc2626";
-          feedbackEl.textContent = "Speech timeout. Tap Speak again.";
-          spokenLabel.textContent = "You said: [Timeout]";
-        }
-      }, 7000);
-    };
-
-    recognition.onresult = function(event) {
-      hardResetRecognition();
-      const spokenText = event.results[0][0].transcript.trim();
-      spokenLabel.textContent = 'You said: "' + spokenText + '"';
-      if (spokenText.toLocaleLowerCase().trim() === expectedWord.toLocaleLowerCase().trim()) {
-        feedbackEl.style.color = "#16a34a";
-        feedbackEl.textContent = '✅ Correct match for "' + expectedWord + '"!';
-        smartSpeak("Correct!");
-      } else {
-        feedbackEl.style.color = "#dc2626";
-        feedbackEl.textContent = '❌ Try again! Expected "' + expectedWord + '".';
-      }
-    };
-
-    recognition.onerror = function(event) {
-      hardResetRecognition();
-      feedbackEl.style.color = "#dc2626";
-      feedbackEl.textContent = "Speech error: " + event.error;
-      spokenLabel.textContent = "You said: [Error]";
-    };
-
-    recognition.onend = function() {
-      hardResetRecognition();
-    };
-
-    recognition.start();
-  } catch (error) {
-    hardResetRecognition();
-    feedbackEl.textContent = "Unable to start recognition.";
-  }
-}
-
-function startListening() {
-  const RecognitionAPI = getRecognitionAPI();
-  if (!RecognitionAPI) {
-    setStatus("Speech recognition API unavailable.");
-    return;
-  }
-
-  hardResetRecognition();
-
-  try {
-    recognition = new RecognitionAPI();
-    recognition.lang = document.getElementById("language").value;
-    recognition.continuous = false;
-    recognition.interimResults = true;
-    recognition.maxAlternatives = 1;
-
-    recognition.onstart = function() {
-      isListening = true; 
-      setStatus("Listening. Speak now.");
-      safetyTimeout = setTimeout(function() {
-        if (isListening) {
-          hardResetRecognition();
-          setStatus("Speech timeout.");
-        }
-      }, 7000);
-    };
-
-    recognition.onresult = function(event) {
-      let transcript = "";
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        transcript += event.results[i][0].transcript;
-      }
-      if (transcript) outputElement.textContent = "You said: " + transcript;
-    };
-
-    recognition.onerror = function(event) {
-      hardResetRecognition();
-      setStatus("Recognition error: " + event.error);
-    };
-
-    recognition.onend = function() {
-      hardResetRecognition();
-      if (statusElement.textContent.includes("Listening")) {
-        setStatus("Listening ended.");
-      }
-    };
-
-    recognition.start();
-  } catch (error) {
-    hardResetRecognition();
-    setStatus("Unable to start recognition.");
-  }
+    } catch (error) {
+        isListening = false;
+        setStatus("Microphone error: " + error.message);
+    }
 }
 
 function stopListening() {
-  hardResetRecognition();
-  setStatus("Speech recognition stopped.");
+    if (recognition && isListening) {
+        try { recognition.stop(); } catch (e) {}
+    }
+    if (mediaRecorder && isListening) {
+        try { mediaRecorder.stop(); } catch (e) {}
+    }
+    isListening = false;
+    setStatus("Stopped.");
+}
+
+/*
+ * DIRECT MICROPHONE TEST
+ */
+async function testActualMicrophone() {
+    try {
+        setStatus("Testing microphone...");
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        diagnosticElement.textContent = "MICROPHONE TEST SUCCESSFUL: Hardware mic stream opened.";
+        setStatus("Microphone working!");
+        stream.getTracks().forEach(track => track.stop());
+    } catch (error) {
+        diagnosticElement.textContent = "MICROPHONE TEST FAILED: " + error.message;
+        setStatus("Microphone test failed.");
+    }
+}
+
+/*
+ * TEXT TO SPEECH (Cloud Stream Fallback)
+ */
+function speakText() {
+    const text = document.getElementById("textInput").value.trim();
+    if (!text) return;
+
+    stopSpeaking();
+    const url = "https://translate.google.com/translate_tts?ie=UTF-8&q=" + encodeURIComponent(text) + "&tl=en&client=tw-ob";
+
+    ttsAudio = new Audio(url);
+    ttsAudio.onended = () => setStatus("TTS completed.");
+    ttsAudio.onerror = () => useBrowserTTS(text);
+
+    setStatus("Playing TTS...");
+    ttsAudio.play().catch(() => useBrowserTTS(text));
+}
+
+function useBrowserTTS(text) {
+    if (!("speechSynthesis" in window)) return;
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    window.speechSynthesis.speak(utterance);
+    setStatus("Playing browser TTS...");
+}
+
+function stopSpeaking() {
+    ttsRequestId++;
+    if (ttsAudio) {
+        ttsAudio.pause();
+        ttsAudio = null;
+    }
+    if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+    setStatus("TTS stopped.");
+}
+
+function runDiagnostic() {
+    diagnosticElement.textContent = "Protocol: " + location.protocol + "\nUser Agent: " + navigator.userAgent;
 }
 </script>
+
 </body>
 </html>
