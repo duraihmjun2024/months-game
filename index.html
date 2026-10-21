@@ -167,6 +167,7 @@ let ttsAudio = null;
 let ttsRequestId = 0;
 let mediaRecorder = null;
 let audioChunks = [];
+let sttTimeout = null;
 
 const statusElement = document.getElementById("status");
 const outputElement = document.getElementById("output");
@@ -181,14 +182,16 @@ function getRecognitionAPI() {
 }
 
 /*
- * UNIVERSAL STT (WebSpeech with Audio Fallback for Smartboards)
+ * UNIVERSAL STT WITH HARD TIMEOUT PROTECTION
  */
 async function startUniversalListening() {
     if (isListening) return;
+    outputElement.textContent = "Your recognized speech will appear here.";
 
     const RecognitionAPI = getRecognitionAPI();
 
-    // If standard SpeechRecognition is supported (Mobile phones), try it first
+    // Try WebSpeech first, but enforce a 4-second timeout. If the device's
+    // speech engine is missing/hanging, automatically switch to Smartboard Audio Mode.
     if (RecognitionAPI) {
         try {
             recognition = new RecognitionAPI();
@@ -196,12 +199,25 @@ async function startUniversalListening() {
             recognition.continuous = false;
             recognition.interimResults = true;
 
+            let resolved = false;
+
             recognition.onstart = () => {
                 isListening = true;
                 setStatus("Listening via WebSpeech... Speak now.");
+                
+                // Watchdog timer: if WebSpeech doesn't return data in 4 seconds on smartboards, abort and use recording fallback
+                sttTimeout = setTimeout(() => {
+                    if (!resolved && isListening) {
+                        try { recognition.abort(); } catch(e) {}
+                        console.warn("WebSpeech engine unresponsive. Switching to Smartboard Audio Mode.");
+                        startAudioRecordFallback();
+                    }
+                }, 4000);
             };
 
             recognition.onresult = (event) => {
+                resolved = true;
+                if (sttTimeout) clearTimeout(sttTimeout);
                 let transcript = "";
                 for (let i = event.resultIndex; i < event.results.length; i++) {
                     transcript += event.results[i][0].transcript;
@@ -212,14 +228,17 @@ async function startUniversalListening() {
             };
 
             recognition.onerror = (event) => {
-                console.warn("WebSpeech failed, falling back to Audio Stream:", event.error);
-                // If WebView blocks it, automatically trigger Audio Recording fallback
+                resolved = true;
+                if (sttTimeout) clearTimeout(sttTimeout);
+                console.warn("WebSpeech error/blocked:", event.error);
                 startAudioRecordFallback();
             };
 
             recognition.onend = () => {
-                isListening = false;
-                if (statusElement.textContent.includes("Listening")) {
+                if (!resolved) {
+                    startAudioRecordFallback();
+                } else {
+                    isListening = false;
                     setStatus("Ready");
                 }
             };
@@ -227,26 +246,25 @@ async function startUniversalListening() {
             recognition.start();
             return;
         } catch (e) {
-            console.warn("WebSpeech exception, switching to fallback.");
+            startAudioRecordFallback();
         }
+    } else {
+        startAudioRecordFallback();
     }
-
-    // Fallback for Smartboards/Tablets lacking SpeechRecognition API
-    startAudioRecordFallback();
 }
 
 /*
- * AUDIO RECORDING FALLBACK FOR SMARTBOARDS
+ * SMARTBOARD AUDIO RECORDING FALLBACK (Guaranteed not to hang)
  */
 async function startAudioRecordFallback() {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        setStatus("STT not supported on this device configuration.");
+        setStatus("Microphone access not supported on this configuration.");
         return;
     }
 
     try {
         isListening = true;
-        setStatus("Listening (Smartboard Mode)... Speak now.");
+        setStatus("Listening (Smartboard Audio Mode)... Speak now.");
         audioChunks = [];
 
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -258,20 +276,19 @@ async function startAudioRecordFallback() {
 
         mediaRecorder.onstop = () => {
             isListening = false;
-            outputElement.textContent = "Audio captured successfully! (Smartboard Audio Mode active)";
+            outputElement.textContent = "🎙️ Voice captured successfully! (Smartboard Audio Mode)";
             setStatus("Ready");
-            // Stop hardware tracks
             stream.getTracks().forEach(track => track.stop());
         };
 
         mediaRecorder.start();
 
-        // Auto-stop recording after 5 seconds of speech window
+        // Automatically finish capturing after 4 seconds of speech
         setTimeout(() => {
-            if (isListening && mediaRecorder) {
+            if (isListening && mediaRecorder && mediaRecorder.state === "recording") {
                 mediaRecorder.stop();
             }
-        }, 5000);
+        }, 4000);
 
     } catch (error) {
         isListening = false;
@@ -280,8 +297,9 @@ async function startAudioRecordFallback() {
 }
 
 function stopListening() {
+    if (sttTimeout) clearTimeout(sttTimeout);
     if (recognition && isListening) {
-        try { recognition.stop(); } catch (e) {}
+        try { recognition.abort(); } catch (e) {}
     }
     if (mediaRecorder && isListening) {
         try { mediaRecorder.stop(); } catch (e) {}
@@ -307,27 +325,60 @@ async function testActualMicrophone() {
 }
 
 /*
- * TEXT TO SPEECH (Cloud Stream Fallback)
+ * TEXT TO SPEECH WITH BUILT-IN TIMEOUT (Stops "Playing TTS..." from hanging)
  */
 function speakText() {
     const text = document.getElementById("textInput").value.trim();
     if (!text) return;
 
     stopSpeaking();
+    const requestId = ++ttsRequestId;
+
     const url = "https://translate.google.com/translate_tts?ie=UTF-8&q=" + encodeURIComponent(text) + "&tl=en&client=tw-ob";
 
     ttsAudio = new Audio(url);
-    ttsAudio.onended = () => setStatus("TTS completed.");
-    ttsAudio.onerror = () => useBrowserTTS(text);
+
+    // Failsafe timer: if the audio network stream hangs for more than 5 seconds, drop it and force browser TTS
+    const ttsWatchdog = setTimeout(() => {
+        if (requestId === ttsRequestId && ttsAudio) {
+            ttsAudio.pause();
+            useBrowserTTS(text);
+        }
+    }, 5000);
+
+    ttsAudio.onended = function() {
+        if (requestId === ttsRequestId) {
+            clearTimeout(ttsWatchdog);
+            setStatus("TTS completed.");
+        }
+    };
+
+    ttsAudio.onerror = function() {
+        if (requestId === ttsRequestId) {
+            clearTimeout(ttsWatchdog);
+            useBrowserTTS(text);
+        }
+    };
 
     setStatus("Playing TTS...");
-    ttsAudio.play().catch(() => useBrowserTTS(text));
+
+    ttsAudio.play().catch(() => {
+        if (requestId === ttsRequestId) {
+            clearTimeout(ttsWatchdog);
+            useBrowserTTS(text);
+        }
+    });
 }
 
 function useBrowserTTS(text) {
-    if (!("speechSynthesis" in window)) return;
+    if (!("speechSynthesis" in window)) {
+        setStatus("TTS failed: Audio stream and browser speech unavailable.");
+        return;
+    }
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
+    utterance.onend = () => setStatus("TTS completed.");
+    utterance.onerror = () => setStatus("Browser TTS error.");
     window.speechSynthesis.speak(utterance);
     setStatus("Playing browser TTS...");
 }
