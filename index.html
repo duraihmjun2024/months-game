@@ -3,463 +3,303 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>iActive Smartboard Voice Tool</title>
-
+<title>Smartboard Voice Diagnostic Tool</title>
 <style>
 * { box-sizing: border-box; }
-
 body {
-    font-family: Arial, sans-serif;
+    font-family: system-ui, -apple-system, sans-serif;
     text-align: center;
-    background: #f4f7f6;
+    background: #0f172a;
+    color: #f8fafc;
     margin: 0;
-    padding: 20px 10px;
-    color: #333;
+    padding: 20px;
 }
-
 .container {
-    max-width: 680px;
+    max-width: 750px;
     margin: auto;
-    padding: 22px 16px;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 4px 10px #0002;
+    padding: 30px;
+    background: #1e293b;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
 }
-
-h2 { color: #174a75; }
-h3 { margin-top: 22px; }
-
-button, select {
-    font-size: 17px;
-    padding: 13px 16px;
-    margin: 6px 3px;
+h1 { color: #38bdf8; margin-top: 0; font-size: 1.8rem; }
+h2 { color: #94a3b8; font-size: 1.2rem; border-bottom: 2px solid #334155; padding-bottom: 8px; margin-top: 25px; }
+button, select, input {
+    font-size: 18px;
+    padding: 15px 20px;
+    margin: 8px 4px;
     border: none;
-    border-radius: 8px;
+    border-radius: 10px;
+    outline: none;
 }
-
 button {
-    background: #007bff;
+    background: #3b82f6;
     color: white;
     cursor: pointer;
-    min-height: 48px;
+    font-weight: 600;
+    min-height: 56px;
+    transition: opacity 0.2s, transform 0.1s;
 }
-
-button:active { opacity: .8; }
-.green { background: #218838; }
-.orange { background: #d98200; }
-.red { background: #c9302c; }
+button:active { transform: scale(0.98); opacity: 0.8; }
+.btn-green { background: #22c55e; }
+.btn-orange { background: #f59e0b; }
+.btn-red { background: #ef4444; }
 
 input[type="text"] {
-    width: 96%;
-    padding: 13px;
-    margin: 10px 0;
+    width: 100%;
+    background: #0f172a;
+    color: white;
+    border: 1px solid #475569;
     font-size: 18px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
+    margin-bottom: 10px;
 }
-
+select {
+    background: #0f172a;
+    color: white;
+    border: 1px solid #475569;
+    width: 100%;
+    margin-bottom: 10px;
+}
 #status {
     font-weight: bold;
-    color: #a94442;
-    overflow-wrap: anywhere;
-}
-
-#output {
-    min-height: 65px;
-    padding: 15px;
-    margin-top: 12px;
-    background: #eef7ff;
-    border-radius: 8px;
-    color: #0275d8;
-    font-size: 22px;
-    overflow-wrap: anywhere;
-}
-
-#diagnostic {
-    text-align: left;
-    white-space: pre-wrap;
-    overflow-wrap: anywhere;
-    background: #f3f3f3;
+    color: #facc15;
+    background: #334155;
     padding: 12px;
     border-radius: 8px;
-    font-size: 14px;
+    margin: 15px 0;
+    font-size: 1.1rem;
 }
-
-.note {
-    font-size: 14px;
-    line-height: 1.5;
-    color: #555;
+#output {
+    min-height: 70px;
+    padding: 18px;
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 10px;
+    color: #38bdf8;
+    font-size: 1.4rem;
+    font-weight: bold;
+    word-break: break-word;
 }
-
-hr {
-    border: 0;
-    border-top: 1px solid #ddd;
-    margin: 25px 0;
-}
+.note { font-size: 0.95rem; color: #94a3b8; line-height: 1.4; }
 </style>
 </head>
-
 <body>
+
 <div class="container">
+    <h1>🏫 Smartboard Voice & Audio Center</h1>
+    <p class="note">Designed for IActive Smartboards & Tablets to test cloud TTS and Web Speech STT safely.</p>
 
-<h2>iActive Smartboard Voice Tool</h2>
-<p class="note">Speech-to-Text and Text-to-Speech</p>
+    <div id="status">Status: Ready to test</div>
 
-<hr>
+    <!-- STT SECTION -->
+    <h2>🎤 Speech-to-Text (STT) Test</h2>
+    <label for="language">Select Recognition Language:</label>
+    <select id="language">
+        <option value="en-IN">English (India)</option>
+        <option value="en-US">English (US)</option>
+        <option value="ta-IN">Tamil</option>
+    </select>
+    
+    <div>
+        <button class="btn-green" onclick="startSmartSTT()">🎙️ Tap & Speak</button>
+        <button class="btn-orange" onclick="stopSmartSTT()">⏹️ Stop</button>
+    </div>
+    <div id="output">Your spoken words will appear here...</div>
 
-<h3>Speech to Text (STT)</h3>
+    <!-- TTS SECTION -->
+    <h2>🔊 Text-to-Speech (TTS) Test</h2>
+    <input type="text" id="textInput" value="Hello! Smartboard text to speech is working perfectly." placeholder="Type text here...">
+    <div>
+        <button class="btn-green" onclick="playSmartTTS()">🔊 Play TTS</button>
+        <button class="btn-red" onclick="stopSmartTTS()">🔇 Stop TTS</button>
+    </div>
 
-<label for="language">Recognition language:</label>
-<br>
-<select id="language">
-    <option value="en-IN">English (India)</option>
-    <option value="en-US">English (US)</option>
-    <option value="ta-IN">Tamil</option>
-</select>
-
-<br>
-
-<button onclick="startListening()">Tap to Listen</button>
-<button class="orange" onclick="stopListening()">Stop Listening</button>
-
-<p id="status" role="status" aria-live="polite">Status: Ready</p>
-
-<div id="output" aria-live="polite">
-Your recognized speech will appear here.
-</div>
-
-<hr>
-
-<h3>Text to Speech (TTS)</h3>
-
-<input
-    type="text"
-    id="textInput"
-    value="Hello, Smartboard is working perfectly."
-    placeholder="Enter text to speak"
->
-
-<br>
-
-<button class="green" onclick="speakText()">Speak Text</button>
-<button class="red" onclick="stopSpeaking()">Stop TTS</button>
-
-<hr>
-
-<h3>Direct Microphone Test</h3>
-
-<p class="note">
-This test checks whether the APK can open the microphone.
-It does not test speech recognition.
-</p>
-
-<button class="orange" onclick="testActualMicrophone()">
-Test Actual Microphone
-</button>
-
-<hr>
-
-<h3>APK Diagnostics</h3>
-
-<button onclick="runDiagnostic()">Test Microphone Support</button>
-<button onclick="testWebsite2APK()">Test Website2APK APIs</button>
-
-<pre id="diagnostic">Diagnostic has not been run.</pre>
-
+    <!-- DIAGNOSTIC SECTION -->
+    <h2>🔧 Hardware Diagnostic</h2>
+    <button class="btn-orange" onclick="runDiagnostics()">Run Environment Check</button>
 </div>
 
 <script>
 "use strict";
 
+const statusEl = document.getElementById("status");
+const outputEl = document.getElementById("output");
 let recognition = null;
 let isListening = false;
 let ttsAudio = null;
-let ttsRequestId = 0;
-let microphoneTestRunning = false;
+let ttsId = 0;
+let sttTimeout = null;
 
-const statusElement = document.getElementById("status");
-const outputElement = document.getElementById("output");
-const diagnosticElement = document.getElementById("diagnostic");
-
-function setStatus(message) {
-    statusElement.textContent = "Status: " + message;
+function setStatus(msg) {
+    statusEl.textContent = "Status: " + msg;
 }
 
-function getRecognitionAPI() {
-    return window.SpeechRecognition ||
-           window.webkitSpeechRecognition ||
-           null;
-}
-
-/*
- * DIRECT MICROPHONE TEST
- */
-async function testActualMicrophone() {
-    if (microphoneTestRunning) return;
-
-    microphoneTestRunning = true;
-
-    if (!navigator.mediaDevices ||
-        !navigator.mediaDevices.getUserMedia) {
-
-        diagnosticElement.textContent =
-            "MICROPHONE TEST FAILED\n\n" +
-            "getUserMedia is unavailable in this WebView.";
-
-        setStatus("Microphone API unavailable.");
-        microphoneTestRunning = false;
+// --- STT ENGINE ---
+function startSmartSTT() {
+    const SpeechAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechAPI) {
+        setStatus("Error: SpeechRecognition API not supported in this environment.");
+        outputEl.textContent = "[Not Supported]";
         return;
     }
 
-    let stream = null;
+    if (isListening) stopSmartSTT();
 
     try {
-        setStatus("Requesting microphone access...");
-
-        diagnosticElement.textContent =
-            "Waiting for Android/WebView microphone permission...";
-
-        stream = await navigator.mediaDevices.getUserMedia({
-            audio: true
-        });
-
-        const tracks = stream.getAudioTracks();
-
-        diagnosticElement.textContent =
-            "MICROPHONE TEST SUCCESSFUL\n\n" +
-            "Audio tracks: " + tracks.length + "\n" +
-            "Track enabled: " +
-            (tracks[0] ? tracks[0].enabled : false) + "\n" +
-            "Track state: " +
-            (tracks[0] ? tracks[0].readyState : "none") +
-            "\n\nThe web page successfully opened the microphone.";
-
-        setStatus("Microphone access successful.");
-
-    } catch (error) {
-        console.error("Microphone test error:", error);
-
-        diagnosticElement.textContent =
-            "MICROPHONE TEST FAILED\n\n" +
-            "Error name: " + error.name + "\n" +
-            "Message: " + error.message + "\n\n" +
-            "Check Android Settings > Apps > this app > Permissions.\n" +
-            "If permission is already allowed, the WebView host " +
-            "may need to handle microphone permission requests.";
-
-        setStatus("Microphone test failed: " + error.name);
-
-    } finally {
-        if (stream) {
-            stream.getTracks().forEach(function(track) {
-                track.stop();
-            });
-        }
-
-        microphoneTestRunning = false;
-    }
-}
-
-/*
- * SPEECH TO TEXT (Direct Initialization without pre-check prompt)
- */
-function startListening() {
-    if (isListening) {
-        setStatus("Already listening. Please speak.");
-        return;
-    }
-
-    const RecognitionAPI = getRecognitionAPI();
-
-    if (!RecognitionAPI) {
-        setStatus("Speech recognition API unavailable.");
-        diagnosticElement.textContent =
-            "SpeechRecognition is not supported by this WebView.";
-        return;
-    }
-
-    try {
-        if (recognition) {
-            try { recognition.abort(); } catch(e) {}
-        }
-
-        recognition = new RecognitionAPI();
+        recognition = new SpeechAPI();
         recognition.lang = document.getElementById("language").value;
         recognition.continuous = false;
         recognition.interimResults = true;
         recognition.maxAlternatives = 1;
 
-        recognition.onstart = function() {
+        let speechCaptured = false;
+
+        recognition.onstart = () => {
             isListening = true;
-            setStatus("Listening. Please speak now.");
+            setStatus("Listening... Speak clearly into the microphone.");
+            outputEl.textContent = "Listening...";
+
+            // 5-second watchdog timer to prevent smartboard UI freezes if speech services time out
+            sttTimeout = setTimeout(() => {
+                if (!speechCaptured && isListening) {
+                    try { recognition.abort(); } catch(e) {}
+                    isListening = false;
+                    setStatus("Timeout: No speech captured or engine unresponsive.");
+                    outputEl.textContent = "[Timeout - Try Again]";
+                }
+            }, 5000);
         };
 
-        recognition.onresult = function(event) {
+        recognition.onresult = (event) => {
+            speechCaptured = true;
+            if (sttTimeout) clearTimeout(sttTimeout);
             let transcript = "";
             for (let i = event.resultIndex; i < event.results.length; i++) {
                 transcript += event.results[i][0].transcript;
             }
             if (transcript) {
-                outputElement.textContent = "You said: " + transcript;
+                outputEl.textContent = transcript;
             }
         };
 
-        recognition.onerror = function(event) {
+        recognition.onerror = (event) => {
+            speechCaptured = true;
+            if (sttTimeout) clearTimeout(sttTimeout);
             isListening = false;
-
-            const messages = {
-                "not-allowed": "Microphone permission denied. Check Android Settings.",
-                "service-not-allowed": "Speech service is blocked or unavailable.",
-                "audio-capture": "Speech recognition cannot access a microphone.",
-                "network": "Speech recognition network error. Check internet.",
-                "no-speech": "No speech detected. Tap Listen and try again.",
-                "aborted": "Recognition interrupted. Tap Listen again.",
-                "language-not-supported": "The selected language is unavailable."
-            };
-
-            setStatus(messages[event.error] || "Recognition error: " + event.error);
-            diagnosticElement.textContent =
-                "SPEECH RECOGNITION ERROR\n\n" +
-                "Error: " + event.error + "\n" +
-                "Message: " + (messages[event.error] || "Unknown recognition error.");
-
-            console.error("Recognition error:", event.error);
+            setStatus("STT Error: " + event.error);
+            outputEl.textContent = "[Error: " + event.error + "]";
         };
 
-        recognition.onend = function() {
+        recognition.onend = () => {
             isListening = false;
-            if (statusElement.textContent === "Status: Listening. Please speak now.") {
-                setStatus("Listening ended. Tap Listen to retry.");
+            if (!speechCaptured) {
+                setStatus("Listening ended.");
+            } else {
+                setStatus("Recognition complete.");
             }
         };
 
-        setStatus("Starting speech recognition...");
         recognition.start();
-
-    } catch (error) {
+    } catch (err) {
         isListening = false;
-        setStatus("Unable to start: " + error.message);
-        console.error(error);
+        setStatus("Initialization Error: " + err.message);
     }
 }
 
-function stopListening() {
+function stopSmartSTT() {
+    if (sttTimeout) clearTimeout(sttTimeout);
     if (recognition && isListening) {
-        try {
-            recognition.stop();
-            setStatus("Stopping speech recognition...");
-        } catch (error) {
-            isListening = false;
-            setStatus("Unable to stop: " + error.message);
-        }
-    } else {
-        setStatus("Recognition is not running.");
+        try { recognition.abort(); } catch(e) {}
     }
+    isListening = false;
+    setStatus("Stopped listening.");
 }
 
-/*
- * TEXT TO SPEECH (Unchanged)
- */
-function speakText() {
+// --- TTS ENGINE ---
+function playSmartTTS() {
     const text = document.getElementById("textInput").value.trim();
-
     if (!text) {
         alert("Please enter text to speak.");
         return;
     }
 
-    stopSpeaking();
+    stopSmartTTS();
+    const currentId = ++ttsId;
 
-    const requestId = ttsRequestId;
+    // Cloud MP3 streaming endpoint bypasses missing local OS voice packs
+    const audioUrl = "https://translate.google.com/translate_tts?ie=UTF-8&q=" + encodeURIComponent(text) + "&tl=en&client=tw-ob";
+    ttsAudio = new Audio(audioUrl);
 
-    const url =
-        "https://translate.google.com/translate_tts" +
-        "?ie=UTF-8&q=" + encodeURIComponent(text) +
-        "&tl=en&client=tw-ob";
+    // Watchdog timer to ensure audio streaming never hangs on "Playing..."
+    const watchdog = setTimeout(() => {
+        if (currentId === ttsId && ttsAudio) {
+            ttsAudio.pause();
+            fallbackBrowserTTS(text);
+        }
+    }, 6000);
 
-    ttsAudio = new Audio(url);
-
-    ttsAudio.onended = function() {
-        if (requestId === ttsRequestId) {
-            setStatus("TTS playback completed.");
+    ttsAudio.onended = () => {
+        if (currentId === ttsId) {
+            clearTimeout(watchdog);
+            setStatus("TTS playback completed successfully.");
         }
     };
 
-    ttsAudio.onerror = function() {
-        if (requestId !== ttsRequestId) return;
-        useBrowserTTS(text);
+    ttsAudio.onerror = () => {
+        if (currentId === ttsId) {
+            clearTimeout(watchdog);
+            fallbackBrowserTTS(text);
+        }
     };
 
-    setStatus("Playing online TTS...");
-
-    ttsAudio.play().catch(function(error) {
-        if (requestId !== ttsRequestId) return;
-        useBrowserTTS(text);
+    setStatus("Streaming cloud TTS audio...");
+    ttsAudio.play().catch(() => {
+        if (currentId === ttsId) {
+            clearTimeout(watchdog);
+            fallbackBrowserTTS(text);
+        }
     });
 }
 
-function useBrowserTTS(text) {
+function fallbackBrowserTTS(text) {
     if (!("speechSynthesis" in window)) {
-        setStatus("Online TTS failed; browser TTS unavailable.");
+        setStatus("TTS Failed: Both cloud audio and browser synthesis unavailable.");
         return;
     }
-
     window.speechSynthesis.cancel();
-
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = "en-IN";
-
-    utterance.onend = function() {
-        setStatus("TTS playback completed.");
-    };
-
-    utterance.onerror = function(event) {
-        setStatus("Browser TTS error: " + event.error);
-    };
-
+    utterance.onend = () => setStatus("Browser TTS completed.");
+    utterance.onerror = () => setStatus("Browser TTS playback error.");
     window.speechSynthesis.speak(utterance);
-    setStatus("Trying browser TTS...");
+    setStatus("Fallback: Playing browser system TTS...");
 }
 
-function stopSpeaking() {
-    ttsRequestId++;
-
+function stopSmartTTS() {
+    ttsId++;
     if (ttsAudio) {
-        ttsAudio.pause();
-        ttsAudio.currentTime = 0;
+        try { ttsAudio.pause(); ttsAudio.currentTime = 0; } catch(e) {}
         ttsAudio = null;
     }
-
     if ("speechSynthesis" in window) {
-        window.speechSynthesis.cancel();
+        try { window.speechSynthesis.cancel(); } catch(e) {}
     }
-
     setStatus("TTS stopped.");
 }
 
-/*
- * GENERAL DIAGNOSTICS
- */
-async function runDiagnostic() {
-    const RecognitionAPI = getRecognitionAPI();
-    const lines = [];
-
-    lines.push("Page protocol: " + location.protocol);
-    lines.push("Secure context: " + window.isSecureContext);
-    lines.push("SpeechRecognition: " + (RecognitionAPI ? "SUPPORTED" : "NOT SUPPORTED"));
-    lines.push("Website2APK bridge: " + typeof window.Website2APK);
-
-    diagnosticElement.textContent = lines.join("\n");
-}
-
-function testWebsite2APK() {
-    const bridge = window.Website2APK;
-    const lines = [];
-    lines.push("Website2APK bridge: " + typeof bridge);
-    if (bridge) {
-        lines.push("Bridge methods: " + Object.keys(bridge).join(", "));
-    }
-    diagnosticElement.textContent = lines.join("\n");
+// --- DIAGNOSTICS ---
+function runDiagnostics() {
+    const hasSpeech = !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+    const hasMedia = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+    const isSecure = window.isSecureContext;
+    
+    alert(
+        "Smartboard Diagnostic Results:\n\n" +
+        "• Protocol: " + location.protocol + "\n" +
+        "• Secure Context (HTTPS): " + (isSecure ? "YES" : "NO") + "\n" +
+        "• SpeechRecognition API: " + (hasSpeech ? "SUPPORTED" : "UNSUPPORTED") + "\n" +
+        "• MediaDevices/Mic API: " + (hasMedia ? "AVAILABLE" : "UNAVAILABLE")
+    );
+    setStatus("Diagnostic completed.");
 }
 </script>
 
