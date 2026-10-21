@@ -152,8 +152,7 @@ function setStatus(msg) {
 }
 
 // --- STT: based on the supplied second file ---
-// Build the final transcript from the current result list instead of
-// repeatedly appending results, which can cause duplicate words.
+// Use one final result per tap to reduce duplicate partial/final words.
 function startCloudSTT() {
     if (isListening) return;
 
@@ -175,8 +174,9 @@ function startCloudSTT() {
         const runId = ++recognitionRunId;
         recognition = new SpeechRecognition();
         recognition.lang = languageEl.value;
-        recognition.continuous = true;
-        recognition.interimResults = true;
+        // One phrase per tap: this reduces repeated partial/final results in WebViews.
+        recognition.continuous = false;
+        recognition.interimResults = false;
         recognition.maxAlternatives = 1;
 
         startBtn.disabled = true;
@@ -195,25 +195,21 @@ function startCloudSTT() {
         recognition.onresult = function(event) {
             if (runId !== recognitionRunId) return;
 
+            // Non-continuous mode returns one phrase. Use only final results;
+            // do not append interim text, which can repeat words in some WebViews.
             const finalParts = [];
-            let interim = "";
-
-            for (let i = 0; i < event.results.length; i++) {
+            for (let i = event.resultIndex; i < event.results.length; i++) {
                 const result = event.results[i];
+                if (!result.isFinal) continue;
                 const transcript = result[0] ? result[0].transcript.trim() : "";
-                if (!transcript) continue;
-
-                if (result.isFinal) {
-                    finalParts.push(transcript);
-                } else {
-                    interim += (interim ? " " : "") + transcript;
-                }
+                if (transcript) finalParts.push(transcript);
             }
 
-            // Preserve the recognizer's actual word order and intentional repeats.
-            outputEl.textContent = finalParts.join(" ") ||
-                "Listening for your words...";
-            interimEl.textContent = interim ? "Recognizing: " + interim : "";
+            if (finalParts.length) {
+                outputEl.textContent = finalParts.join(" ");
+                interimEl.textContent = "";
+                setStatus("Words recognized. Tap Speak to recognize another phrase.");
+            }
         };
 
         recognition.onerror = function(event) {
