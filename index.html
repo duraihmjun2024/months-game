@@ -1,181 +1,131 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Smartboard Cloud Voice Center</title>
-
 <style>
 * { box-sizing: border-box; }
-
 body {
-  font-family: Arial, sans-serif;
-  text-align: center;
-  background: #0f172a;
-  color: #f8fafc;
-  margin: 0;
-  padding: 12px;
+    font-family: system-ui, -apple-system, sans-serif;
+    text-align: center;
+    background: #0f172a;
+    color: #f8fafc;
+    margin: 0;
+    padding: 20px;
 }
-
 .container {
-  max-width: 750px;
-  margin: auto;
-  padding: 22px;
-  background: #1e293b;
-  border-radius: 16px;
+    max-width: 750px;
+    margin: auto;
+    padding: 30px;
+    background: #1e293b;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
 }
-
-h1 { color: #38bdf8; font-size: 1.6rem; }
-h2 {
-  color: #94a3b8;
-  font-size: 1.15rem;
-  border-bottom: 2px solid #334155;
-  padding-bottom: 8px;
-  margin-top: 25px;
-}
-
+h1 { color: #38bdf8; margin-top: 0; font-size: 1.8rem; }
+h2 { color: #94a3b8; font-size: 1.2rem; border-bottom: 2px solid #334155; padding-bottom: 8px; margin-top: 25px; }
 button, select, input {
-  font-size: 18px;
-  padding: 14px;
-  margin: 7px 3px;
-  border: none;
-  border-radius: 10px;
+    font-size: 18px;
+    padding: 15px 20px;
+    margin: 8px 4px;
+    border: none;
+    border-radius: 10px;
+    outline: none;
 }
-
 button {
-  background: #3b82f6;
-  color: white;
-  cursor: pointer;
-  font-weight: bold;
-  min-height: 54px;
+    background: #3b82f6;
+    color: white;
+    cursor: pointer;
+    font-weight: 600;
+    min-height: 56px;
+    transition: opacity 0.2s, transform 0.1s;
 }
+button:active { transform: scale(0.98); opacity: 0.8; }
+button:disabled { opacity: 0.55; cursor: not-allowed; }
+.btn-green { background: #22c55e; }
+.btn-orange { background: #f59e0b; }
+.btn-red { background: #ef4444; }
 
-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+input[type="text"] {
+    width: 100%;
+    background: #0f172a;
+    color: white;
+    border: 1px solid #475569;
+    font-size: 18px;
+    margin-bottom: 10px;
 }
-
-.btn-green { background: #16a34a; }
-.btn-orange { background: #d97706; }
-.btn-red { background: #dc2626; }
-
-input, select {
-  width: 100%;
-  background: #0f172a;
-  color: white;
-  border: 1px solid #475569;
-  margin: 8px 0;
+select {
+    background: #0f172a;
+    color: white;
+    border: 1px solid #475569;
+    width: 100%;
+    margin-bottom: 10px;
 }
-
 #status {
-  font-weight: bold;
-  color: #facc15;
-  background: #334155;
-  padding: 13px;
-  border-radius: 8px;
-  margin: 15px 0;
-  overflow-wrap: anywhere;
+    font-weight: bold;
+    color: #facc15;
+    background: #334155;
+    padding: 12px;
+    border-radius: 8px;
+    margin: 15px 0;
+    font-size: 1.1rem;
+    overflow-wrap: anywhere;
 }
-
 #output {
-  min-height: 100px;
-  padding: 18px;
-  background: #0f172a;
-  border: 2px solid #38bdf8;
-  border-radius: 10px;
-  color: #38bdf8;
-  font-size: 1.4rem;
-  font-weight: bold;
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-  text-align: left;
+    min-height: 70px;
+    padding: 18px;
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 10px;
+    color: #38bdf8;
+    font-size: 1.4rem;
+    font-weight: bold;
+    word-break: break-word;
+    white-space: pre-wrap;
+    text-align: left;
 }
-
-.note {
-  font-size: 0.95rem;
-  color: #cbd5e1;
-  line-height: 1.5;
-}
-
+.note { font-size: 0.95rem; color: #94a3b8; line-height: 1.4; }
 #interim {
-  color: #facc15;
-  font-size: 1.1rem;
-  min-height: 25px;
-  overflow-wrap: anywhere;
+    color: #facc15;
+    font-size: 1.05rem;
+    min-height: 25px;
+    overflow-wrap: anywhere;
+    text-align: left;
 }
 </style>
 </head>
-
 <body>
+
 <div class="container">
+    <h1>🏫 Smartboard Cloud Voice Center</h1>
+    <p class="note">Hardware audio streaming optimized for factory-reset Android displays.</p>
 
-  <h1>🏫 Smartboard Cloud Voice Center</h1>
-  <p class="note">
-    Speech recognition and text-to-speech testing
-  </p>
+    <div id="status">Status: Ready</div>
 
-  <div id="status">Status: Ready</div>
+    <!-- STT SECTION: Web Speech Recognition from the supplied STT file -->
+    <h2>🎤 Speech-to-Text (Smartboard Mode)</h2>
+    <label for="language">Select Recognition Language:</label>
+    <select id="language">
+        <option value="en-IN">English (India)</option>
+        <option value="en-US">English (US)</option>
+        <option value="ta-IN">Tamil</option>
+    </select>
 
-  <!-- SPEECH TO TEXT -->
-  <h2>🎤 Speech-to-Text (STT)</h2>
+    <div>
+        <button id="startBtn" class="btn-green" onclick="startCloudSTT()">🎙️ Tap &amp; Speak</button>
+        <button id="stopBtn" class="btn-orange" onclick="stopCloudSTT()" disabled>⏹️ Stop</button>
+        <button class="btn-red" onclick="clearSTT()">Clear Words</button>
+    </div>
+    <div id="output" aria-live="polite">Your voice data will display here...</div>
+    <div id="interim"></div>
 
-  <label for="language">Recognition language:</label>
-  <select id="language">
-    <option value="en-IN">English (India)</option>
-    <option value="en-US">English (US)</option>
-    <option value="ta-IN">Tamil</option>
-  </select>
-
-  <div>
-    <button id="startBtn" class="btn-green"
-            onclick="startSTT()">
-      🎙️ Tap &amp; Speak
-    </button>
-
-    <button id="stopBtn" class="btn-orange"
-            onclick="stopSTT()" disabled>
-      ⏹️ Stop
-    </button>
-
-    <button class="btn-red" onclick="clearSTT()">
-      Clear Words
-    </button>
-  </div>
-
-  <p class="note">
-    Tap Speak, allow microphone access if requested, and speak
-    clearly. Recognized words will appear below.
-  </p>
-
-  <div id="output" aria-live="polite">
-    Your recognized words will appear here.
-  </div>
-
-  <div id="interim"></div>
-
-  <!-- TEXT TO SPEECH -->
-  <h2>🔊 Text-to-Speech (TTS)</h2>
-
-  <input type="text" id="textInput"
-    value="Hello! Smartboard text to speech is working."
-    placeholder="Enter text to speak">
-
-  <div>
-    <button class="btn-green" onclick="playTTS()">
-      🔊 Play TTS
-    </button>
-
-    <button class="btn-red" onclick="stopTTS()">
-      🔇 Stop TTS
-    </button>
-  </div>
-
-  <p class="note">
-    Note: Online speech recognition requires a compatible browser
-    and a working recognition service. An internet connection may
-    be required.
-  </p>
+    <!-- TTS SECTION: retained from the user's original file -->
+    <h2>🔊 Text-to-Speech (TTS)</h2>
+    <input type="text" id="textInput" value="Hello! Smartboard text to speech is working perfectly." placeholder="Type text here...">
+    <div>
+        <button class="btn-green" onclick="playSmartTTS()">🔊 Play TTS</button>
+        <button class="btn-red" onclick="stopSmartTTS()">🔇 Stop TTS</button>
+    </div>
 </div>
 
 <script>
@@ -189,260 +139,251 @@ const startBtn = document.getElementById("startBtn");
 const stopBtn = document.getElementById("stopBtn");
 
 const SpeechRecognition =
-  window.SpeechRecognition ||
-  window.webkitSpeechRecognition;
+    window.SpeechRecognition || window.webkitSpeechRecognition;
 
 let recognition = null;
-let listening = false;
-let finalWords = "";
+let isListening = false;
 let ttsAudio = null;
 let ttsId = 0;
+let recognitionRunId = 0;
 
-function setStatus(message) {
-  statusEl.textContent = "Status: " + message;
+function setStatus(msg) {
+    statusEl.textContent = "Status: " + msg;
 }
 
-// ---------------- SPEECH TO TEXT ----------------
+// --- STT: based on the supplied second file ---
+// Build the final transcript from the current result list instead of
+// repeatedly appending results, which can cause duplicate words.
+function startCloudSTT() {
+    if (isListening) return;
 
-function startSTT() {
-  if (listening) return;
-
-  if (!window.isSecureContext) {
-    setStatus("Use HTTPS to access the microphone.");
-    outputEl.textContent =
-      "Please open this page using a secure HTTPS address.";
-    return;
-  }
-
-  if (!SpeechRecognition) {
-    setStatus("Speech recognition is not supported.");
-    outputEl.textContent =
-      "This browser or Smartboard WebView does not provide " +
-      "the Web Speech Recognition API. Try opening this same " +
-      "HTTPS page directly in Google Chrome. If it is already " +
-      "Chrome, the recognition service may be unavailable.";
-    return;
-  }
-
-  try {
-    recognition = new SpeechRecognition();
-
-    recognition.lang = languageEl.value;
-    recognition.continuous = true;
-    recognition.interimResults = true;
-    recognition.maxAlternatives = 1;
-
-    recognition.onstart = function() {
-      listening = true;
-      startBtn.disabled = true;
-      stopBtn.disabled = false;
-      languageEl.disabled = true;
-      interimEl.textContent = "";
-      setStatus("Listening. Please speak now.");
-    };
-
-    recognition.onresult = function(event) {
-      let interim = "";
-
-      for (let i = event.resultIndex;
-           i < event.results.length; i++) {
-
-        const result = event.results[i];
-        const transcript = result[0].transcript;
-
-        if (result.isFinal) {
-          finalWords += transcript + " ";
-        } else {
-          interim += transcript;
-        }
-      }
-
-      outputEl.textContent =
-        finalWords.trim() || "Listening for your words...";
-
-      interimEl.textContent = interim
-        ? "Recognizing: " + interim
-        : "";
-    };
-
-    recognition.onerror = function(event) {
-      let message = event.error || "unknown error";
-
-      const explanations = {
-        "not-allowed":
-          "Microphone permission denied. Allow microphone access.",
-        "service-not-allowed":
-          "The browser or device blocks the recognition service.",
-        "audio-capture":
-          "No working microphone was found.",
-        "network":
-          "Recognition network error. Check internet access.",
-        "no-speech":
-          "No speech detected. Tap Speak and try again.",
-        "language-not-supported":
-          "This recognition language is not supported.",
-        "aborted":
-          "Recognition was cancelled."
-      };
-
-      setStatus(explanations[message] || "STT error: " + message);
-    };
-
-    recognition.onend = function() {
-      listening = false;
-      startBtn.disabled = false;
-      stopBtn.disabled = true;
-      languageEl.disabled = false;
-      interimEl.textContent = "";
-
-      if (finalWords.trim()) {
-        outputEl.textContent = finalWords.trim();
-        setStatus("Recognition ended. Your words are displayed.");
-      } else {
-        setStatus("Recognition ended. Tap Speak to try again.");
-      }
-
-      recognition = null;
-    };
-
-    setStatus("Starting speech recognition...");
-
-    // Must be triggered by the user's button tap.
-    recognition.start();
-
-  } catch (error) {
-    listening = false;
-    startBtn.disabled = false;
-    stopBtn.disabled = true;
-    languageEl.disabled = false;
-
-    setStatus("Could not start: " + error.message);
-  }
-}
-
-function stopSTT() {
-  if (recognition && listening) {
-    setStatus("Stopping recognition...");
-    try {
-      recognition.stop();
-    } catch (error) {
-      setStatus("Stop error: " + error.message);
+    if (!window.isSecureContext) {
+        setStatus("Use HTTPS to access speech recognition.");
+        outputEl.textContent = "Please open this page using a secure HTTPS address.";
+        return;
     }
-  }
+
+    if (!SpeechRecognition) {
+        setStatus("Speech recognition is not supported.");
+        outputEl.textContent =
+            "This browser or Smartboard WebView does not provide speech recognition. " +
+            "Try the APK's supported recognition environment or Chrome with a working recognition service.";
+        return;
+    }
+
+    try {
+        const runId = ++recognitionRunId;
+        recognition = new SpeechRecognition();
+        recognition.lang = languageEl.value;
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.maxAlternatives = 1;
+
+        startBtn.disabled = true;
+        stopBtn.disabled = false;
+        languageEl.disabled = true;
+        outputEl.textContent = "Listening for your words...";
+        interimEl.textContent = "";
+        setStatus("Starting speech recognition...");
+
+        recognition.onstart = function() {
+            if (runId !== recognitionRunId) return;
+            isListening = true;
+            setStatus("Listening... Please speak now.");
+        };
+
+        recognition.onresult = function(event) {
+            if (runId !== recognitionRunId) return;
+
+            const finalParts = [];
+            let interim = "";
+
+            for (let i = 0; i < event.results.length; i++) {
+                const result = event.results[i];
+                const transcript = result[0] ? result[0].transcript.trim() : "";
+                if (!transcript) continue;
+
+                if (result.isFinal) {
+                    finalParts.push(transcript);
+                } else {
+                    interim += (interim ? " " : "") + transcript;
+                }
+            }
+
+            // Preserve the recognizer's actual word order and intentional repeats.
+            outputEl.textContent = finalParts.join(" ") ||
+                "Listening for your words...";
+            interimEl.textContent = interim ? "Recognizing: " + interim : "";
+        };
+
+        recognition.onerror = function(event) {
+            if (runId !== recognitionRunId) return;
+            const explanations = {
+                "not-allowed": "Microphone permission denied. Allow microphone access for the APK.",
+                "service-not-allowed": "The device or browser blocks the speech recognition service.",
+                "audio-capture": "No working microphone was found.",
+                "network": "Recognition network error. Check the internet connection.",
+                "no-speech": "No speech detected. Tap Speak and try again.",
+                "language-not-supported": "This recognition language is not supported.",
+                "aborted": "Recognition was cancelled."
+            };
+            setStatus(explanations[event.error] || "STT error: " + (event.error || "unknown error"));
+        };
+
+        recognition.onend = function() {
+            if (runId !== recognitionRunId) return;
+            isListening = false;
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+            languageEl.disabled = false;
+            interimEl.textContent = "";
+            if (outputEl.textContent === "Listening for your words...") {
+                setStatus("Recognition ended. No final words received; tap Speak to retry.");
+            } else {
+                setStatus("Recognition ended. Your words are displayed.");
+            }
+            recognition = null;
+        };
+
+        // Must run directly from the user's button press.
+        recognition.start();
+    } catch (err) {
+        isListening = false;
+        startBtn.disabled = false;
+        stopBtn.disabled = true;
+        languageEl.disabled = false;
+        recognition = null;
+        setStatus("Could not start recognition: " + err.message);
+    }
+}
+
+function stopCloudSTT() {
+    if (recognition && isListening) {
+        setStatus("Stopping recognition...");
+        try {
+            recognition.stop();
+        } catch (err) {
+            setStatus("Stop error: " + err.message);
+        }
+    } else {
+        startBtn.disabled = false;
+        stopBtn.disabled = true;
+        languageEl.disabled = false;
+        setStatus("Recognition is not running.");
+    }
 }
 
 function clearSTT() {
-  if (recognition && listening) {
-    try {
-      recognition.abort();
-    } catch (error) {}
-  }
-
-  finalWords = "";
-  outputEl.textContent = "Your recognized words will appear here.";
-  interimEl.textContent = "";
-  setStatus("Ready for a new attempt.");
+    recognitionRunId++;
+    if (recognition) {
+        try { recognition.abort(); } catch (err) {}
+    }
+    recognition = null;
+    isListening = false;
+    startBtn.disabled = false;
+    stopBtn.disabled = true;
+    languageEl.disabled = false;
+    outputEl.textContent = "Your voice data will display here...";
+    interimEl.textContent = "";
+    setStatus("Ready");
 }
 
-// ---------------- TEXT TO SPEECH ----------------
-
-function playTTS() {
-  const text = document.getElementById("textInput")
-    .value.trim();
-
-  if (!text) {
-    setStatus("Please enter text to speak.");
-    return;
-  }
-
-  stopTTS();
-  const currentId = ++ttsId;
-
-  setStatus("Trying online TTS...");
-
-  const audioUrl =
-    "https://translate.google.com/translate_tts?ie=UTF-8&q=" +
-    encodeURIComponent(text) +
-    "&tl=en&client=tw-ob";
-
-  const audio = new Audio(audioUrl);
-  ttsAudio = audio;
-  let fallbackStarted = false;
-
-  const watchdog = setTimeout(function() {
-    if (currentId === ttsId && !fallbackStarted) {
-      fallbackStarted = true;
-      audio.pause();
-      fallbackBrowserTTS(text, currentId);
+// --- ORIGINAL TTS ENGINE RETAINED, with safer fallback handling ---
+function playSmartTTS() {
+    const text = document.getElementById("textInput").value.trim();
+    if (!text) {
+        alert("Please enter text to speak.");
+        return;
     }
-  }, 7000);
 
-  audio.onended = function() {
-    if (currentId !== ttsId) return;
-    clearTimeout(watchdog);
-    setStatus("Online TTS completed.");
-  };
+    stopSmartTTS();
+    const currentId = ++ttsId;
 
-  audio.onerror = function() {
-    if (currentId !== ttsId || fallbackStarted) return;
-    clearTimeout(watchdog);
-    fallbackStarted = true;
-    fallbackBrowserTTS(text, currentId);
-  };
+    const audioUrl =
+        "https://translate.google.com/translate_tts?ie=UTF-8&q=" +
+        encodeURIComponent(text) + "&tl=en&client=tw-ob";
 
-  audio.play().catch(function() {
-    if (currentId !== ttsId || fallbackStarted) return;
-    clearTimeout(watchdog);
-    fallbackStarted = true;
-    fallbackBrowserTTS(text, currentId);
-  });
+    const audio = new Audio(audioUrl);
+    ttsAudio = audio;
+    let fallbackStarted = false;
+
+    const watchdog = setTimeout(function() {
+        if (currentId === ttsId && !fallbackStarted) {
+            fallbackStarted = true;
+            try { audio.pause(); audio.currentTime = 0; } catch (err) {}
+            fallbackBrowserTTS(text, currentId);
+        }
+    }, 6000);
+
+    audio.onended = function() {
+        if (currentId === ttsId) {
+            clearTimeout(watchdog);
+            setStatus("TTS playback completed.");
+        }
+    };
+
+    audio.onerror = function() {
+        if (currentId === ttsId && !fallbackStarted) {
+            clearTimeout(watchdog);
+            fallbackStarted = true;
+            fallbackBrowserTTS(text, currentId);
+        }
+    };
+
+    setStatus("Streaming cloud TTS audio...");
+    audio.play().catch(function() {
+        if (currentId === ttsId && !fallbackStarted) {
+            clearTimeout(watchdog);
+            fallbackStarted = true;
+            fallbackBrowserTTS(text, currentId);
+        }
+    });
 }
 
 function fallbackBrowserTTS(text, currentId) {
-  if (currentId !== ttsId) return;
+    if (currentId !== ttsId) return;
 
-  if (!("speechSynthesis" in window)) {
-    setStatus("Online and browser TTS unavailable.");
-    return;
-  }
-
-  window.speechSynthesis.cancel();
-
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = "en-IN";
-
-  utterance.onend = function() {
-    if (currentId === ttsId) {
-      setStatus("Browser TTS completed.");
+    if (!("speechSynthesis" in window) ||
+        typeof SpeechSynthesisUtterance === "undefined") {
+        setStatus("TTS failed: online audio and browser speech are unavailable.");
+        return;
     }
-  };
 
-  utterance.onerror = function(event) {
-    if (currentId === ttsId) {
-      setStatus("Browser TTS error: " + event.error);
+    try {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = "en-IN";
+        utterance.onend = function() {
+            if (currentId === ttsId) setStatus("Browser TTS completed.");
+        };
+        utterance.onerror = function(event) {
+            if (currentId === ttsId) {
+                setStatus("Browser TTS error: " + (event.error || "unknown error"));
+            }
+        };
+
+        setStatus("Playing browser fallback TTS...");
+        window.speechSynthesis.speak(utterance);
+    } catch (err) {
+        setStatus("Browser TTS failed: " + err.message);
     }
-  };
-
-  setStatus("Trying browser TTS...");
-  window.speechSynthesis.speak(utterance);
 }
 
-function stopTTS() {
-  ttsId++;
-
-  if (ttsAudio) {
-    ttsAudio.pause();
-    ttsAudio.currentTime = 0;
-    ttsAudio = null;
-  }
-
-  if ("speechSynthesis" in window) {
-    window.speechSynthesis.cancel();
-  }
-
-  setStatus("TTS stopped.");
+function stopSmartTTS() {
+    ttsId++;
+    if (ttsAudio) {
+        try {
+            ttsAudio.pause();
+            ttsAudio.currentTime = 0;
+        } catch (err) {}
+        ttsAudio = null;
+    }
+    if ("speechSynthesis" in window) {
+        try { window.speechSynthesis.cancel(); } catch (err) {}
+    }
+    setStatus("TTS stopped.");
 }
 </script>
+
 </body>
 </html>
-```
