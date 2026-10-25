@@ -98,7 +98,7 @@ select {
 
 <div class="container">
     <h1>🏫 Smartboard Cloud Voice Center</h1>
-    <p class="note">Hardware audio streaming optimized for restricted Android &amp; Smartboard displays.</p>
+    <p class="note">Hardware audio streaming optimized for Android &amp; Smartboard displays.</p>
 
     <div id="status">Status: Ready</div>
 
@@ -255,11 +255,11 @@ function clearSTT() {
     setStatus("Ready");
 }
 
-/* ROBUST OFFLINE-COMPATIBLE SMARTBOARD TTS ENGINE */
-function playSmartTTS(onComplete) {
+/* CLEAN TTS ENGINE (NO TONE/MUSIC FALLBACK) */
+function playSmartTTS() {
     const text = document.getElementById("textInput").value.trim();
     if (!text) {
-        if (onComplete) onComplete();
+        alert("Please enter text to speak.");
         return;
     }
 
@@ -267,7 +267,7 @@ function playSmartTTS(onComplete) {
     const currentId = ++ttsId;
     setStatus("Streaming cloud TTS audio...");
 
-    // Tier 1: StreamElements API
+    // Primary: StreamElements API
     const seUrl = "https://api.streamelements.com/kappa/v2/speech?voice=Brian&text=" + encodeURIComponent(text);
     const audio = new Audio(seUrl);
     ttsAudio = audio;
@@ -275,10 +275,7 @@ function playSmartTTS(onComplete) {
     let triedGoogle = false;
 
     audio.onended = function() {
-        if (currentId === ttsId) {
-            setStatus("TTS playback completed.");
-            if (onComplete) onComplete();
-        }
+        if (currentId === ttsId) setStatus("TTS playback completed.");
     };
 
     audio.onerror = function() {
@@ -286,20 +283,14 @@ function playSmartTTS(onComplete) {
         if (!triedGoogle) {
             triedGoogle = true;
             setStatus("Switching to secondary cloud TTS (Google)...");
-            // Tier 2: Google Translate TTS
             const googleUrl = "https://translate.google.com/translate_tts?ie=UTF-8&q=" + encodeURIComponent(text) + "&tl=en&client=tw-ob";
             const googleAudio = new Audio(googleUrl);
             ttsAudio = googleAudio;
-            googleAudio.onended = () => { 
-                if (currentId === ttsId) {
-                    setStatus("Google TTS completed."); 
-                    if (onComplete) onComplete();
-                }
-            };
-            googleAudio.onerror = () => fallbackBrowserOrSyntheticTTS(text, currentId, onComplete);
-            googleAudio.play().catch(() => fallbackBrowserOrSyntheticTTS(text, currentId, onComplete));
+            googleAudio.onended = () => { if (currentId === ttsId) setStatus("Google TTS completed."); };
+            googleAudio.onerror = () => fallbackBrowserTTS(text, currentId);
+            googleAudio.play().catch(() => fallbackBrowserTTS(text, currentId));
         } else {
-            fallbackBrowserOrSyntheticTTS(text, currentId, onComplete);
+            fallbackBrowserTTS(text, currentId);
         }
     };
 
@@ -310,21 +301,16 @@ function playSmartTTS(onComplete) {
             const googleUrl = "https://translate.google.com/translate_tts?ie=UTF-8&q=" + encodeURIComponent(text) + "&tl=en&client=tw-ob";
             const googleAudio = new Audio(googleUrl);
             ttsAudio = googleAudio;
-            googleAudio.onended = () => { 
-                if (currentId === ttsId) {
-                    setStatus("Google TTS completed."); 
-                    if (onComplete) onComplete();
-                }
-            };
-            googleAudio.onerror = () => fallbackBrowserOrSyntheticTTS(text, currentId, onComplete);
-            googleAudio.play().catch(() => fallbackBrowserOrSyntheticTTS(text, currentId, onComplete));
+            googleAudio.onended = () => { if (currentId === ttsId) setStatus("Google TTS completed."); };
+            googleAudio.onerror = () => fallbackBrowserTTS(text, currentId);
+            googleAudio.play().catch(() => fallbackBrowserTTS(text, currentId));
         } else {
-            fallbackBrowserOrSyntheticTTS(text, currentId, onComplete);
+            fallbackBrowserTTS(text, currentId);
         }
     });
 }
 
-function fallbackBrowserOrSyntheticTTS(text, currentId, onComplete) {
+function fallbackBrowserTTS(text, currentId) {
     if (currentId !== ttsId) return;
 
     if ("speechSynthesis" in window && typeof SpeechSynthesisUtterance !== "undefined") {
@@ -333,58 +319,17 @@ function fallbackBrowserOrSyntheticTTS(text, currentId, onComplete) {
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = "en-IN";
             utterance.onend = function() {
-                if (currentId === ttsId) {
-                    setStatus("Browser TTS completed.");
-                    if (onComplete) onComplete();
-                }
+                if (currentId === ttsId) setStatus("Browser TTS completed.");
             };
-            utterance.onerror = function() {
-                playSyntheticSpeech(text, currentId, onComplete);
+            utterance.onerror = function(event) {
+                if (currentId === ttsId) setStatus("Browser TTS error: " + (event.error || "unavailable"));
             };
             setStatus("Playing browser fallback TTS...");
             window.speechSynthesis.speak(utterance);
             return;
         } catch (err) {}
     }
-    playSyntheticSpeech(text, currentId, onComplete);
-}
-
-// Tier 4: Local Formant Synthesizer (guaranteed local speech sound on locked hardware)
-function playSyntheticSpeech(text, currentId, onComplete) {
-    if (currentId !== ttsId) return;
-    try {
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        if (AudioContext) {
-            const ctx = new AudioContext();
-            const words = text.split(/\s+/);
-            let timeOffset = ctx.currentTime;
-
-            words.forEach((w, idx) => {
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
-                osc.type = idx % 2 === 0 ? "triangle" : "sine";
-                osc.frequency.setValueAtTime(220 + (idx * 25) % 150, timeOffset);
-                
-                gain.gain.setValueAtTime(0.001, timeOffset);
-                gain.gain.linearRampToValueAtTime(0.15, timeOffset + 0.05);
-                gain.gain.exponentialRampToValueAtTime(0.001, timeOffset + 0.35);
-
-                osc.connect(gain);
-                gain.connect(ctx.destination);
-                
-                osc.start(timeOffset);
-                osc.stop(timeOffset + 0.38);
-                timeOffset += 0.42;
-            });
-
-            setStatus("Smartboard local speech synthesis active.");
-            setTimeout(() => {
-                if (currentId === ttsId && onComplete) onComplete();
-            }, words.length * 420);
-            return;
-        }
-    } catch(e) {}
-    if (onComplete) onComplete();
+    setStatus("TTS unavailable on this browser context.");
 }
 
 function stopSmartTTS() {
